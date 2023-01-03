@@ -19,7 +19,7 @@ __copyright__ = '(c) 2011 by Matthew Frazier'
 __all__ = ['LoginManager']
 
 from flask import (_request_ctx_stack, abort, current_app, flash, redirect,
-                   request, session, url_for, has_request_context)
+                   request, session, url_for, has_request_context, g)
 from flask.signals import Namespace
 
 from werkzeug.local import LocalProxy
@@ -420,6 +420,7 @@ class LoginManager(object):
                 session['user_id'] = getattr(user, self.id_attribute)()
                 session['_fresh'] = False
                 _request_ctx_stack.top.user = user
+                g.user = user
             else:
                 self.reload_user()
         else:
@@ -718,6 +719,7 @@ def login_user(user, remember=False, force=False, fresh=True):
         session['remember'] = 'set'
 
     _request_ctx_stack.top.user = user
+    g.user = user
     user_logged_in.send(current_app._get_current_object(), user=_get_user())
     return True
 
