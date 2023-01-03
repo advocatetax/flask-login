@@ -420,7 +420,6 @@ class LoginManager(object):
                 session['user_id'] = getattr(user, self.id_attribute)()
                 session['_fresh'] = False
                 _request_ctx_stack.top.user = user
-                g.user = user
             else:
                 self.reload_user()
         else:
@@ -719,7 +718,6 @@ def login_user(user, remember=False, force=False, fresh=True):
         session['remember'] = 'set'
 
     _request_ctx_stack.top.user = user
-    g.user = user
     user_logged_in.send(current_app._get_current_object(), user=_get_user())
     return True
 
@@ -787,6 +785,7 @@ def login_required(func):
     '''
     @wraps(func)
     def decorated_view(*args, **kwargs):
+        g.user = current_user
         if current_app.login_manager._login_disabled:
             return func(*args, **kwargs)
         elif not current_user.is_authenticated:
